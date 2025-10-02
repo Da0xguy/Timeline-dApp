@@ -1,0 +1,39 @@
+import React from "react";
+import "../App.css";
+
+
+function Home() {
+  
+
+  return (
+    <>
+    <section className="hero" id="home">
+      <h1>TIMELINE,<br/><span>Your Clothing Brand</span></h1>
+      <h2></h2>
+      <p>Elevate your style with TIMELINE!
+        Get exclusive updates on our latest T-shirts designs,
+         behind-the-scenes peeks, and special promotions.
+      </p>
+      <button className="explore-btn">Explore items </button>
+    </section>
+    <section className="story" id="about">
+      <h2>Wear the Story</h2>
+      <p>This is more than a clothing brand. <b>Timeline</b> is a movement - where fashion meets faith, and walk with God becomes something you can literally wear. Every design tells a part of <b>His story</b>- from creation to the cross, from the empty grave to your calling. We're here to help you express your faith with boldness, creativity</p>
+      <h4>What to expect here:</h4>
+      
+      <ul>
+        <li>Sneak Peeks of upcoming </li>
+        <li>Devotional-style design breakdowns</li>
+        <li>Behind-the-scenes of the brand</li>
+        <li>Real conversations about faith + purpose</li>
+        <li>Early access to launches</li>
+        <li>Promo codes</li>
+        <li>Self development and growth</li>
+      </ul>
+      
+    </section>
+    </>
+  );
+}
+
+export default Home;

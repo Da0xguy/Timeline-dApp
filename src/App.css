@@ -1,0 +1,249 @@
+.navbar {
+  width: 98%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 15px;
+  background: black;
+  border-bottom: 2px solid red;
+}
+
+.logo {
+  color: #920606;
+  font-size: 1.5rem;
+}
+
+.links {
+  display: flex;
+  gap: 20px;
+  margin: 0;
+}
+
+.links ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.links li {
+  color: white;
+  text-decoration: none;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.links li:hover {
+  color: red;
+}
+
+.links li.active {
+  color: #8f0909;
+  font-weight: 600;
+}
+
+.links li.active::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #555;
+  border-radius: 2px;
+}
+
+.admin-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 18px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+.admin-btn:hover {
+  background: darkred;
+}
+
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup {
+  background: #000000;
+  opacity: 0.8;
+  padding: 20px;
+  border: 2px solid red;
+  border-radius: 8px;
+  width: 350px;
+  text-align: center;
+}
+
+.popup h2 {
+  margin-bottom: 15px;
+  color: red;
+}
+
+.popup input {
+  width: 90%;
+  padding: 8px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 5px;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.popup-actions button {
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.popup-actions button:first-child {
+  background: #555;
+  color: white;
+}
+
+.popup-actions button:last-child {
+  background: red;
+  color: white;
+}
+
+.popup-actions button:last-child:hover {
+background-color:#8f0909;
+}
+
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.hero h1 {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 45px;
+  font-weight: bold;
+  color: #920606; 
+}
+
+.hero h1 span {
+    color: #fff;
+    font-size: 40px;
+}
+
+.hero p{
+  justify-content: center;    
+  margin: 16px auto;
+  max-width: 600px;
+  font-size: 18px;
+  background: linear-gradient(to right, #fff, #920606);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.explore-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.explore-btn:hover {
+ background: #8f0909;
+ transform: scale(1.05);
+}
+
+.story {
+  text-align: center;
+}
+
+.story h2 {
+    font-size: 2rem;
+    color: #920606;
+}
+
+.story h4 {
+    font-size: 1.1rem;
+    color: #920606;
+}
+
+.story p {
+    font-size: 0.95rem;
+    margin: 0px 10px ;
+    background: linear-gradient(to right, #fff, #920606);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+@media (max-width < 760px) {
+  .navbar{
+    width: 97%;
+  }
+}
+
+.story ul {
+  list-style: none;
+  justify-content: center;
+}
+
+.story ul li {
+    background: linear-gradient(to right, #fff, #920606);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+.contact {
+    background: linear-gradient(to right, #111, #920606);
+}
+
+.admin {
+    background: linear-gradient(to right, #111, #920606);
+}
+
+.carousel {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.carousel-inner {
+  display: flex;
+  transition: transform 0.8s ease-in-out;
+  width: 100%;
+}
+
+.carousel-item {
+  min-width: 100%;
+  transition: opacity 0.5s ease;
+}
+
+.carousel-item img {
+  width: 100%;
+  display: block;
+}
