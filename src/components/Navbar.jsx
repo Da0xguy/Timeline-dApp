@@ -5,7 +5,10 @@ import "../App.css";
 function Navbar({ setShowLogin }) {
   return (
     <nav className="navbar">
-      <h1 className="logo">TIMELINE</h1>
+      <div className="logo">
+      <img src=""/>
+      <h1>TIMELINE</h1>
+      </div>
       <div className="links">
         <ul>
         <li smooth={true} duration={500} spy={true} onClick={() => scrollToSection("home")}>Home</li>

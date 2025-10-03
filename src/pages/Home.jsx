@@ -1,10 +1,21 @@
 import React from "react";
 import "../App.css";
+import Carousel from "../components/carousel"
 
 
 function Home() {
-  
+   const uploadedImages = [
+    "src/assets/pic1.jpg",
+    "src/assets/pic2.jpg",
+    "src/assets/pic3.jpg",
+    "src/assets/pic4.jpg",
+    "src/assets/pic5.jpg",
+    "src/assets/pic6.jpg",
+    "src/assets/pic7.jpg",
+    "src/assets/pic8.jpg"
+  ];
 
+  
   return (
     <>
     <section className="hero" id="home">
@@ -30,8 +41,14 @@ function Home() {
         <li>Promo codes</li>
         <li>Self development and growth</li>
       </ul>
-      
+       <div>
+      <h2>Quotes</h2>
+      <Carousel images={uploadedImages} />
+    </div>
     </section>
+   <footer className="footer">
+    <p>&copy; 2025 Timeline All Rights Reserved</p>
+   </footer>
     </>
   );
 }
