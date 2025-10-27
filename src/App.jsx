@@ -7,6 +7,14 @@ import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import LoginPopup from "./components/LoginPopup";
 
+function ErrorBoundary({ children }) {
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      {children}
+    </React.Suspense>
+  );
+}
+
 function App() {
   const [showLogin, setShowLogin] = useState(false);
 
@@ -21,7 +29,11 @@ function App() {
         <Route path="/admin" element={<Admin />} />
       </Routes>
 
-      {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
+      {showLogin && (
+        <ErrorBoundary>
+          <LoginPopup onClose={() => setShowLogin(false)} />
+        </ErrorBoundary>
+      )}
     </div>
   );
 }
