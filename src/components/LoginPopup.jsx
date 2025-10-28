@@ -12,7 +12,10 @@ function LoginPopup({ onClose }) {
     e.preventDefault();
 
     if (username === "admin" && password === "1234") {
+      // ✅ Go to admin page
       navigate("/admin");
+      // ✅ Close popup after successful login
+      onClose();
     } else {
       setError("Invalid username or password");
     }

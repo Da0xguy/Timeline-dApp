@@ -6,6 +6,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import LoginPopup from "./components/LoginPopup";
+import Dashboard from "./pages/Dashboard";
+
 
 function ErrorBoundary({ children }) {
   return (
@@ -27,6 +29,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/products" element={<Dashboard />} />
+
       </Routes>
 
       {showLogin && (
