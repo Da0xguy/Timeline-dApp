@@ -20,25 +20,36 @@ function Home() {
   return (
     <>
       <section className="hero" id="home">
-        <h1>
-          TIMELINE,<br />
-          <span>Your Clothing Brand</span>
-        </h1>
+        <div className="hero-content">
+          <div className="">
+          <h1>
+            TIMELINE,<br />
+            <span>Your Clothing Brand</span>
+          </h1>
 
-        <p>
-          Elevate your style with TIMELINE! Get exclusive updates on our latest
-          T-shirt designs, behind-the-scenes peeks, and special promotions.
-        </p>
+          <p>
+            Elevate your style with TIMELINE! Get exclusive updates on our latest
+            T-shirt designs, behind-the-scenes peeks, and special promotions.
+          </p>
 
-        <button
-          onClick={() => navigate("/products")}
-          className="explore-btn"
-        >
-          Explore Items
-        </button>
+          <button
+            onClick={() => navigate("/products")}
+            className="explore-btn"
+          >
+            Explore Items
+          </button>
+          </div>
+        </div>
+        <div className="hero-image">
+          <img src="src/assets/pic9.jpg" />
+        </div>
       </section>
 
       <section className="story" id="about">
+        <div className="story-img">
+          <img src="src/assets/mission.jpg" />
+        </div>
+        <div className="story-text">
         <h2>Wear the Story</h2>
         <p>
           This is more than a clothing brand. <b>Timeline</b> is a movement —
@@ -58,13 +69,13 @@ function Home() {
           <li>Promo codes</li>
           <li>Self development and growth</li>
         </ul>
-
-        <div className="quotes-section">
-          <h2>Quotes</h2>
-          <Carousel images={uploadedImages} />
-        </div>
+      </div>
+       
       </section>
-
+          <div className="quotes-section">
+            <h2>Quotes</h2>
+            <Carousel images={uploadedImages} />
+          </div>
       <footer className="footer">
         <p>&copy; 2025 Timeline — All Rights Reserved</p>
       </footer>

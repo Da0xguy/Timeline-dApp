@@ -22,7 +22,7 @@ function Carousel() {
     }
   };
 
-  // 🔁 Load once on mount and listen for admin updates
+  // 🔁 Load once on mount
   useEffect(() => {
     loadImages();
     const handleUpdate = () => loadImages();
@@ -30,22 +30,24 @@ function Carousel() {
     return () => window.removeEventListener("carousel-updated", handleUpdate);
   }, []);
 
-  // ⏱️ Auto slide every 3 seconds
+  // ⏱️ Auto slide every 3s
   useEffect(() => {
     if (images.length === 0) return;
+
     const interval = setInterval(() => {
       setCurrent((prev) => prev + 1);
     }, 3000);
+
     return () => clearInterval(interval);
   }, [images]);
 
-  // 🌀 Smooth looping
+  // 🌀 Infinite loop logic
   useEffect(() => {
     if (current === totalSlides) {
       const timeout = setTimeout(() => {
         setTransitionEnabled(false);
         setCurrent(0);
-      }, 600);
+      }, 600); // match transition duration
       return () => clearTimeout(timeout);
     } else {
       setTransitionEnabled(true);

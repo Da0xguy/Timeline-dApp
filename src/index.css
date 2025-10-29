@@ -1,14 +1,19 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #111;
-  color: #eee;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  z-index: 1;
+  color: #222;
 }
+
 
 .App {
   min-height: 100vh;
   width: 1000%;
-  background-color: black;
+  background-color: #fff;
 }
 
 .page {
