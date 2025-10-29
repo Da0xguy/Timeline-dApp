@@ -14,7 +14,7 @@ function Navbar() {
       <nav className="navbar">
         {/* Logo section */}
         <div className="logo">
-          <img src="src/assets/logo.png" alt="Timeline Logo" />
+          <img src="src/assets/logo.jpeg" alt="Timeline Logo" />
           <h1>TIMELINE</h1>
         </div>
 
@@ -79,7 +79,7 @@ function Navbar() {
             {/* Sidebar logo (aligned to the right) */}
             <div className="sidebar-logo">
               <h1>TIMELINE</h1>
-              <img src="/assets/logo.png" alt="Timeline Logo" />
+              <img src="src/assets/logo.png" alt="Timeline Logo" />
             </div>
           </div>
         </div>

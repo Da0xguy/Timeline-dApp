@@ -1,81 +1,93 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import "../App.css";
 import Carousel from "../components/carousel";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
+  const heroImageRef = useRef(null);
+  const storyImageRef = useRef(null);
 
-  const uploadedImages = [
-    "src/assets/pic1.jpg",
-    "src/assets/pic2.jpg",
-    "src/assets/pic3.jpg",
-    "src/assets/pic4.jpg",
-    "src/assets/pic5.jpg",
-    "src/assets/pic6.jpg",
-    "src/assets/pic7.jpg",
-    "src/assets/pic8.jpg",
-  ];
+  useEffect(() => {
+    const images = [heroImageRef.current, storyImageRef.current];
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("active");
+        } else {
+          entry.target.classList.remove("active");
+        }
+      });
+    });
+
+    images.forEach((img) => {
+      if (img) observer.observe(img);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
 
   return (
     <>
       <section className="hero" id="home">
         <div className="hero-content">
-          <div className="">
-          <h1>
-            TIMELINE,<br />
-            <span>Your Clothing Brand</span>
-          </h1>
-
-          <p>
-            Elevate your style with TIMELINE! Get exclusive updates on our latest
-            T-shirt designs, behind-the-scenes peeks, and special promotions.
-          </p>
-
-          <button
-            onClick={() => navigate("/products")}
-            className="explore-btn"
-          >
-            Explore Items
-          </button>
+          <div>
+            <h1>
+              TIMELINE,<br />
+              <span>Your Clothing Brand</span>
+            </h1>
+            <p>
+              Elevate your style with TIMELINE! Get exclusive updates on our
+              latest T-shirt designs, behind-the-scenes peeks, and special
+              promotions.
+            </p>
+            <button
+              onClick={() => navigate("/products")}
+              className="explore-btn"
+            >
+              Explore Items
+            </button>
           </div>
         </div>
+
         <div className="hero-image">
-          <img src="src/assets/pic9.jpg" />
+          <img ref={heroImageRef} src="src/assets/pic9.jpg" alt="Hero" />
         </div>
       </section>
 
       <section className="story" id="about">
         <div className="story-img">
-          <img src="src/assets/mission.jpg" />
+          <img ref={storyImageRef} src="src/assets/mission.jpg" alt="Mission" />
         </div>
-        <div className="story-text">
-        <h2>Wear the Story</h2>
-        <p>
-          This is more than a clothing brand. <b>Timeline</b> is a movement —
-          where fashion meets faith, and walking with God becomes something you
-          can literally wear. Every design tells a part of <b>His story</b> —
-          from creation to the cross, from the empty grave to your calling.
-          We're here to help you express your faith with boldness and creativity.
-        </p>
 
-        <h4>What to Expect Here:</h4>
-        <ul>
-          <li>Sneak Peeks of upcoming designs</li>
-          <li>Devotional-style design breakdowns</li>
-          <li>Behind-the-scenes of the brand</li>
-          <li>Real conversations about faith + purpose</li>
-          <li>Early access to launches</li>
-          <li>Promo codes</li>
-          <li>Self development and growth</li>
-        </ul>
-      </div>
-       
+        <div className="story-text">
+          <h2>Wear the Story</h2>
+          <p>
+            This is more than a clothing brand. <b>Timeline</b> is a movement —
+            where fashion meets faith, and walking with God becomes something you
+            can literally wear. Every design tells a part of <b>His story</b> —
+            from creation to the cross, from the empty grave to your calling.
+          </p>
+
+          <h4>What to Expect Here:</h4>
+          <ul>
+            <li>Sneak Peeks of upcoming designs</li>
+            <li>Devotional-style design breakdowns</li>
+            <li>Behind-the-scenes of the brand</li>
+            <li>Real conversations about faith + purpose</li>
+            <li>Early access to launches</li>
+            <li>Promo codes</li>
+            <li>Self development and growth</li>
+          </ul>
+        </div>
       </section>
-          <div className="quotes-section">
-            <h2>Quotes</h2>
-            <Carousel images={uploadedImages} />
-          </div>
+
+      <div className="quotes-section">
+        <Carousel />
+      </div>
+
       <footer className="footer">
         <p>&copy; 2025 Timeline — All Rights Reserved</p>
       </footer>
