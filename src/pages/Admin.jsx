@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage, db } from "../firebase";
 import {
   collection,
@@ -8,9 +8,6 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-
-const STORAGE_KEY = "carouselImages";
-const PRODUCT_KEY = "productList";
 
 export default function AdminUploader() {
   const [carouselImages, setCarouselImages] = useState([]);
@@ -23,6 +20,7 @@ export default function AdminUploader() {
     price: "",
     about: "",
     image: "",
+    path: "",
   });
 
   // ✅ Load data from Firestore on mount
@@ -41,7 +39,7 @@ export default function AdminUploader() {
     setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   }
 
-  // ✅ Upload Carousel Images
+  // ✅ Upload Carousel Images + Save Storage Path
   async function handleCarouselUpload(e) {
     setError("");
     const files = Array.from(e.target.files || []);
@@ -53,176 +51,149 @@ export default function AdminUploader() {
       for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
 
-        const storageRef = ref(storage, `carousel/${Date.now()}-${file.name}`);
+        const filePath = `carousel/${Date.now()}-${file.name}`;
+        const storageRef = ref(storage, filePath);
+
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);
 
         await addDoc(collection(db, "carousel"), {
           url,
           name: file.name,
+          path: filePath, // ✅ stored for deletion
         });
       }
-
       loadCarouselImages();
     } catch (err) {
       console.error(err);
-      setError("Upload failed. Try smaller images.");
+      setError("Upload failed. Try again.");
     } finally {
       setBusy(false);
       e.target.value = null;
     }
   }
 
-  // ✅ Delete Carousel Image
-  async function removeCarouselImage(id) {
-    await deleteDoc(doc(db, "carousel", id));
-    loadCarouselImages();
+  // ✅ Delete Carousel Image + Firebase Storage file
+  async function removeCarouselImage(id, path) {
+    try {
+      await deleteObject(ref(storage, path));
+      await deleteDoc(doc(db, "carousel", id));
+      loadCarouselImages();
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting file");
+    }
   }
 
-  // ✅ Clear All Carousel Images
   async function clearCarousel() {
     const snap = await getDocs(collection(db, "carousel"));
-    for (const docu of snap.docs) {
-      await deleteDoc(doc(db, "carousel", docu.id));
+    for (const d of snap.docs) {
+      if (d.data().path) await deleteObject(ref(storage, d.data().path));
+      await deleteDoc(doc(db, "carousel", d.id));
     }
     loadCarouselImages();
   }
 
-  // ✅ Form Change
+  // ✅ Product Input
   function handleProductChange(e) {
-    setProductForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setProductForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  // ✅ Upload Product Image
+  // ✅ Upload Product Image + Save Path
   async function handleProductImage(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    const storageRef = ref(storage, `products/${Date.now()}-${file.name}`);
+    const filePath = `products/${Date.now()}-${file.name}`;
+    const storageRef = ref(storage, filePath);
+
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
 
-    setProductForm((prev) => ({ ...prev, image: url }));
+    setProductForm(prev => ({
+      ...prev,
+      image: url,
+      path: filePath, // ✅ Save delete path
+    }));
   }
 
   // ✅ Add Product
   async function addProduct() {
     if (!productForm.name || !productForm.price || !productForm.image) {
-      setError("Please fill all fields and upload an image.");
+      setError("Please fill all fields & upload an image.");
       return;
     }
 
     await addDoc(collection(db, "products"), productForm);
-
-    setProductForm({ name: "", price: "", about: "", image: "" });
+    setProductForm({ name: "", price: "", about: "", image: "", path: "" });
     loadProducts();
   }
 
-  // ✅ Delete Product
-  async function deleteProduct(id) {
-    await deleteDoc(doc(db, "products", id));
-    loadProducts();
+  // ✅ Delete Product + Storage File
+  async function deleteProduct(id, path) {
+    try {
+      await deleteObject(ref(storage, path));
+      await deleteDoc(doc(db, "products", id));
+      loadProducts();
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting product");
+    }
   }
 
   return (
     <div className="admin">
       <h2>Admin Panel</h2>
 
-      {/* 🔹 Carousel Upload Section */}
+      {/* 🔹 Carousel Upload */}
       <div className="uploader">
         <h3>Carousel Image Upload</h3>
-        <input
-          id="file"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleCarouselUpload}
-          disabled={busy}
-        />
-        <small>
-          Images are uploaded to <code>Firebase</code>.
-        </small>
+        <input type="file" accept="image/*" multiple onChange={handleCarouselUpload} disabled={busy}/>
         {error && <div className="error">{error}</div>}
       </div>
 
-      <div className="admin-actions">
-        <button onClick={clearCarousel} disabled={carouselImages.length === 0}>
-          Clear all slides
-        </button>
-      </div>
+      <button onClick={clearCarousel} disabled={!carouselImages.length}>
+        Clear all slides
+      </button>
 
-      {/* ✅ YOUR ORIGINAL PREVIEW GRID */}
       <div className="preview-grid">
-        {carouselImages.length === 0 && (
-          <div className="note">No slides yet</div>
-        )}
-
-        {carouselImages.map((img) => (
+        {carouselImages.map(img => (
           <div className="preview-card" key={img.id}>
-            <img src={img.url} alt={img.name} />
+            <img src={img.url} alt={img.name}/>
             <div className="meta">
               <div className="name">{img.name}</div>
-              <button onClick={() => removeCarouselImage(img.id)}>
-                Delete
-              </button>
+              <button onClick={() => removeCarouselImage(img.id, img.path)}>Delete</button>
             </div>
           </div>
         ))}
       </div>
 
-      <hr style={{ margin: "30px 0", borderColor: "red" }} />
+      <hr />
 
-      {/* 🔹 Product Upload Section */}
+      {/* 🔹 Product Upload */}
       <div className="product-section">
-        <h3>Product Upload</h3>
+        <h3>Add Product</h3>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Product name"
-          value={productForm.name}
-          onChange={handleProductChange}
-        />
-        <input
-          type="text"
-          name="price"
-          placeholder="Price"
-          value={productForm.price}
-          onChange={handleProductChange}
-        />
-        <textarea
-          name="about"
-          placeholder="About product"
-          value={productForm.about}
-          onChange={handleProductChange}
-        />
+        <input name="name" placeholder="Name" value={productForm.name} onChange={handleProductChange} />
+        <input name="price" placeholder="Price" value={productForm.price} onChange={handleProductChange} />
+        <textarea name="about" placeholder="About" value={productForm.about} onChange={handleProductChange} />
+
         <input type="file" accept="image/*" onChange={handleProductImage} />
 
-        {productForm.image && (
-          <div className="preview-card">
-            <img src={productForm.image} alt="preview" />
-          </div>
-        )}
+        {productForm.image && <img src={productForm.image} width="120"/>}
 
-        <button className="admin-btn" onClick={addProduct}>
-          Add Product
-        </button>
+        <button onClick={addProduct}>Add Product</button>
       </div>
 
-      {/* ✅ Original Product Preview */}
       <div className="preview-grid">
-        {products.length === 0 && (
-          <div className="note">No products added yet</div>
-        )}
-
-        {products.map((p) => (
+        {products.map(p => (
           <div className="preview-card" key={p.id}>
-            <img src={p.image} alt={p.name} />
+            <img src={p.image} alt={p.name}/>
             <div className="meta">
               <div className="name">{p.name}</div>
               <div className="price">{p.price}</div>
               <div className="desc">{p.about}</div>
-              <button onClick={() => deleteProduct(p.id)}>Delete</button>
+              <button onClick={() => deleteProduct(p.id, p.path)}>Delete</button>
             </div>
           </div>
         ))}
