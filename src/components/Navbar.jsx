@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import "../App.css";
 import LoginPopup from "./LoginPopup";
+import Logo from "../assets/logo.jpeg"
 
 function Navbar() {
   const [showLogin, setShowLogin] = useState(false);
@@ -14,7 +15,7 @@ function Navbar() {
       <nav className="navbar">
         {/* Logo section */}
         <div className="logo">
-          <img src="src/assets/logo.jpeg" alt="Timeline Logo" />
+          <img src={Logo} alt="Timeline Logo" />
           <h1>TIMELINE</h1>
         </div>
 
@@ -79,7 +80,7 @@ function Navbar() {
             {/* Sidebar logo (aligned to the right) */}
             <div className="sidebar-logo">
               <h1>TIMELINE</h1>
-              <img src="src/assets/logo.png" alt="Timeline Logo" />
+              <img src={Logo} alt="Timeline Logo" />
             </div>
           </div>
         </div>

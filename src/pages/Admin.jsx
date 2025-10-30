@@ -1,41 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage, db } from "../firebase";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 const STORAGE_KEY = "carouselImages";
 const PRODUCT_KEY = "productList";
-
-// Utility: compress image
-async function fileToDataUrl(file, maxWidth = 1200, quality = 0.8) {
-  const dataUrl = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.onload = (e) => resolve(e.target.result);
-    reader.readAsDataURL(file);
-  });
-
-  if (!dataUrl.startsWith("data:image/")) return dataUrl;
-
-  return await new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(1, maxWidth / img.width);
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
-
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#af0e0eff";
-      ctx.fillRect(0, 0, w, h);
-      ctx.drawImage(img, 0, 0, w, h);
-
-      const compressed = canvas.toDataURL("image/jpeg", quality);
-      resolve(compressed);
-    };
-    img.onerror = () => resolve(dataUrl);
-    img.src = dataUrl;
-  });
-}
 
 export default function AdminUploader() {
   const [carouselImages, setCarouselImages] = useState([]);
@@ -50,111 +25,103 @@ export default function AdminUploader() {
     image: "",
   });
 
+  // ✅ Load data from Firestore on mount
   useEffect(() => {
     loadCarouselImages();
     loadProducts();
   }, []);
 
-  function loadCarouselImages() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      setCarouselImages(raw ? JSON.parse(raw) : []);
-    } catch (e) {
-      console.error(e);
-      setCarouselImages([]);
-    }
+  async function loadCarouselImages() {
+    const snap = await getDocs(collection(db, "carousel"));
+    setCarouselImages(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   }
 
-  function loadProducts() {
-    try {
-      const raw = localStorage.getItem(PRODUCT_KEY);
-      setProducts(raw ? JSON.parse(raw) : []);
-    } catch (e) {
-      console.error(e);
-      setProducts([]);
-    }
+  async function loadProducts() {
+    const snap = await getDocs(collection(db, "products"));
+    setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   }
 
-  // 🖼️ Handle Carousel Upload
+  // ✅ Upload Carousel Images
   async function handleCarouselUpload(e) {
     setError("");
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
+
     setBusy(true);
+
     try {
-      const processed = [];
       for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
-        const dataUrl = await fileToDataUrl(file, 1200, 0.78);
-        processed.push({
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+
+        const storageRef = ref(storage, `carousel/${Date.now()}-${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+
+        await addDoc(collection(db, "carousel"), {
+          url,
           name: file.name,
-          dataUrl,
         });
       }
-      const newImgs = [...carouselImages, ...processed];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newImgs));
-      setCarouselImages(newImgs);
-      window.dispatchEvent(new Event("carousel-updated"));
+
+      loadCarouselImages();
     } catch (err) {
       console.error(err);
-      setError("Upload failed. Try smaller images or fewer files.");
+      setError("Upload failed. Try smaller images.");
     } finally {
       setBusy(false);
       e.target.value = null;
     }
   }
 
-  // 🗑️ Remove Carousel Image
-  function removeCarouselImage(id) {
-    const newImgs = carouselImages.filter((i) => i.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newImgs));
-    setCarouselImages(newImgs);
-    window.dispatchEvent(new Event("carousel-updated"));
+  // ✅ Delete Carousel Image
+  async function removeCarouselImage(id) {
+    await deleteDoc(doc(db, "carousel", id));
+    loadCarouselImages();
   }
 
-  // 🧹 Clear All Carousel
-  function clearCarousel() {
-    localStorage.removeItem(STORAGE_KEY);
-    setCarouselImages([]);
-    window.dispatchEvent(new Event("carousel-updated"));
+  // ✅ Clear All Carousel Images
+  async function clearCarousel() {
+    const snap = await getDocs(collection(db, "carousel"));
+    for (const docu of snap.docs) {
+      await deleteDoc(doc(db, "carousel", docu.id));
+    }
+    loadCarouselImages();
   }
 
-  // 🛒 Handle Product Input Change
+  // ✅ Form Change
   function handleProductChange(e) {
-    const { name, value } = e.target;
-    setProductForm((prev) => ({ ...prev, [name]: value }));
+    setProductForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  // 🖼️ Handle Product Image Upload
+  // ✅ Upload Product Image
   async function handleProductImage(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const dataUrl = await fileToDataUrl(file, 800, 0.8);
-    setProductForm((prev) => ({ ...prev, image: dataUrl }));
+
+    const storageRef = ref(storage, `products/${Date.now()}-${file.name}`);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+
+    setProductForm((prev) => ({ ...prev, image: url }));
   }
 
-  // 💾 Add Product
-  function addProduct() {
+  // ✅ Add Product
+  async function addProduct() {
     if (!productForm.name || !productForm.price || !productForm.image) {
       setError("Please fill all fields and upload an image.");
       return;
     }
-    const newProduct = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      ...productForm,
-    };
-    const updated = [...products, newProduct];
-    localStorage.setItem(PRODUCT_KEY, JSON.stringify(updated));
-    setProducts(updated);
+
+    await addDoc(collection(db, "products"), productForm);
+
     setProductForm({ name: "", price: "", about: "", image: "" });
+    loadProducts();
   }
 
-  // ❌ Delete Product
-  function deleteProduct(id) {
-    const updated = products.filter((p) => p.id !== id);
-    localStorage.setItem(PRODUCT_KEY, JSON.stringify(updated));
-    setProducts(updated);
+  // ✅ Delete Product
+  async function deleteProduct(id) {
+    await deleteDoc(doc(db, "products", id));
+    loadProducts();
   }
 
   return (
@@ -173,7 +140,7 @@ export default function AdminUploader() {
           disabled={busy}
         />
         <small>
-          Images are compressed and saved to <code>localStorage</code>.
+          Images are uploaded to <code>Firebase</code>.
         </small>
         {error && <div className="error">{error}</div>}
       </div>
@@ -184,14 +151,20 @@ export default function AdminUploader() {
         </button>
       </div>
 
+      {/* ✅ YOUR ORIGINAL PREVIEW GRID */}
       <div className="preview-grid">
-        {carouselImages.length === 0 && <div className="note">No slides yet</div>}
+        {carouselImages.length === 0 && (
+          <div className="note">No slides yet</div>
+        )}
+
         {carouselImages.map((img) => (
           <div className="preview-card" key={img.id}>
-            <img src={img.dataUrl} alt={img.name || "slide"} />
+            <img src={img.url} alt={img.name} />
             <div className="meta">
               <div className="name">{img.name}</div>
-              <button onClick={() => removeCarouselImage(img.id)}>Delete</button>
+              <button onClick={() => removeCarouselImage(img.id)}>
+                Delete
+              </button>
             </div>
           </div>
         ))}
@@ -202,6 +175,7 @@ export default function AdminUploader() {
       {/* 🔹 Product Upload Section */}
       <div className="product-section">
         <h3>Product Upload</h3>
+
         <input
           type="text"
           name="name"
@@ -212,7 +186,7 @@ export default function AdminUploader() {
         <input
           type="text"
           name="price"
-          placeholder="Price (e.g. $25)"
+          placeholder="Price"
           value={productForm.price}
           onChange={handleProductChange}
         />
@@ -235,8 +209,12 @@ export default function AdminUploader() {
         </button>
       </div>
 
+      {/* ✅ Original Product Preview */}
       <div className="preview-grid">
-        {products.length === 0 && <div className="note">No products added yet</div>}
+        {products.length === 0 && (
+          <div className="note">No products added yet</div>
+        )}
+
         {products.map((p) => (
           <div className="preview-card" key={p.id}>
             <img src={p.image} alt={p.name} />

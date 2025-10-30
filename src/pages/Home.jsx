@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import "../App.css";
+import Hero from "../assets/pic9.jpg"
+import Mission from "../assets/mission.jpg"
 import Carousel from "../components/carousel";
 import { useNavigate } from "react-router-dom";
 
@@ -53,13 +55,13 @@ function Home() {
         </div>
 
         <div className="hero-image">
-          <img ref={heroImageRef} src="src/assets/pic9.jpg" alt="Hero" />
+          <img ref={heroImageRef} src={Hero} alt="Hero" />
         </div>
       </section>
 
       <section className="story" id="about">
         <div className="story-img">
-          <img ref={storyImageRef} src="src/assets/mission.jpg" alt="Mission" />
+          <img ref={storyImageRef} src={Mission} alt="Mission" />
         </div>
 
         <div className="story-text">
