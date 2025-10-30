@@ -25,7 +25,7 @@ async function fileToDataUrl(file, maxWidth = 1200, quality = 0.8) {
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#fff";
+      ctx.fillStyle = "#af0e0eff";
       ctx.fillRect(0, 0, w, h);
       ctx.drawImage(img, 0, 0, w, h);
 
