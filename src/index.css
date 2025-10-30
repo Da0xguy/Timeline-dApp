@@ -4,7 +4,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-   background: rgba(44, 44, 44, 0.75);
+  background: #ede7c7;
   z-index: 1;
   color: #222;
 }
