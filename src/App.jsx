@@ -5,7 +5,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/dashboard";
 import AdminUploader from "./pages/Admin"; // your admin page
 import Login from "./components/Login";
 import PrivateRoute from "./components/PrivateRoute";
