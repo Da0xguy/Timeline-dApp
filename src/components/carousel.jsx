@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "../supabase"; // ✅ Use your shared Supabase client
+import { supabase } from "../supabase";
 import "../App.css";
 
 function Carousel() {
@@ -10,23 +10,20 @@ function Carousel() {
 
   const totalSlides = images.length;
 
-
+  // Load images from public folder
   const loadImages = async () => {
     console.log("🔄 Fetching carousel images...");
 
     try {
- 
-const { data, error } = await supabase.storage
-  .from("carousel")
-  .list("public", { limit: 100 });
-
+      const { data, error } = await supabase.storage
+        .from("carousel")
+        .list("public", { limit: 100 });
 
       if (error) {
         console.error("❌ Error fetching carousel images:", error);
         return;
       }
 
-      // ✅ Filter out non-image files
       const imageFiles = data.filter(
         (file) =>
           file.name.endsWith(".jpg") ||
@@ -37,11 +34,11 @@ const { data, error } = await supabase.storage
 
       console.log("📸 Found image files:", imageFiles);
 
-      // ✅ Generate public URLs for each image
+      // ✅ Generate public URLs for each image (public folder)
       const urls = imageFiles.map((file) => {
         const { data: publicUrlData } = supabase.storage
           .from("carousel")
-          .getPublicUrl(`private/${file.name}`);
+          .getPublicUrl(`public/${file.name}`); // ✅ Use 'public' here
         return publicUrlData.publicUrl;
       });
 
@@ -52,12 +49,12 @@ const { data, error } = await supabase.storage
     }
   };
 
-  // 🔁 Load once on mount
+  // Load once on mount
   useEffect(() => {
     loadImages();
   }, []);
 
-  // ⏱️ Auto-slide every 3 seconds
+  // Auto-slide every 3 seconds
   useEffect(() => {
     if (images.length === 0) return;
 
@@ -68,7 +65,7 @@ const { data, error } = await supabase.storage
     return () => clearInterval(interval);
   }, [images]);
 
-  // 🌀 Infinite loop logic
+  // Infinite loop logic
   useEffect(() => {
     if (current === totalSlides) {
       const timeout = setTimeout(() => {
@@ -81,7 +78,7 @@ const { data, error } = await supabase.storage
     }
   }, [current, totalSlides]);
 
-  // 💨 If empty
+  // If empty
   if (images.length === 0) {
     return (
       <div className="carousel-container empty">
@@ -90,7 +87,7 @@ const { data, error } = await supabase.storage
     );
   }
 
-  // 🖼️ Render
+  // Render
   return (
     <div className="carousel-container">
       <div
