@@ -23,17 +23,17 @@ export default function AdminUploader() {
   async function loadData() {
     console.log("🔄 Loading data from Supabase Storage...");
 
-    // Load carousel images
+    // Load carousel images from public folder
     const { data: slides, error: slidesError } = await supabase.storage
       .from("carousel")
-      .list("private", { limit: 100 });
+      .list("public", { limit: 100 }); // 🔹 public folder
 
     if (slidesError) console.error("❌ Carousel error:", slidesError);
     else console.log("✅ Carousel files:", slides);
 
     setCarouselImages(slides || []);
 
-    // Load products (both images + JSON)
+    // Load products (same as before)
     const { data: productFiles, error: productsError } = await supabase.storage
       .from("products")
       .list("private", { limit: 100 });
@@ -43,10 +43,8 @@ export default function AdminUploader() {
       return toast.error("Could not load products");
     }
 
-    // Only get .json files (our metadata)
     const jsonFiles = productFiles.filter((file) => file.name.endsWith(".json"));
 
-    // Fetch and parse metadata
     const productList = [];
     for (const file of jsonFiles) {
       const { data: fileData, error: fileError } = await supabase.storage
@@ -61,7 +59,7 @@ export default function AdminUploader() {
       try {
         const text = await fileData.text();
         const product = JSON.parse(text);
-        product._fileName = file.name; // store file name for deletion
+        product._fileName = file.name;
         productList.push(product);
       } catch (err) {
         console.error("⚠️ Invalid JSON in file:", file.name);
@@ -78,16 +76,16 @@ export default function AdminUploader() {
     window.location.href = "/login";
   }
 
-  // ✅ Upload helper
-  async function uploadToSupabase(file, bucket, setProgress) {
+  // ✅ Upload helper (uploads to public folder for carousel)
+  async function uploadToSupabase(file, bucket, setProgress, isPublic = false) {
     try {
       const safeName = file.name
         .toLowerCase()
         .replace(/\s+/g, "_")
         .replace(/[^\w.-]/g, "");
-
       const fileName = `${Date.now()}-${safeName}`;
-      const filePath = `private/${fileName}`;
+      const folder = isPublic ? "public" : "private";
+      const filePath = `${folder}/${fileName}`;
 
       const { data, error } = await supabase.storage
         .from(bucket)
@@ -109,12 +107,12 @@ export default function AdminUploader() {
     }
   }
 
-  // ✅ Upload carousel image
+  // ✅ Upload carousel image to public folder
   async function handleCarouselUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    const url = await uploadToSupabase(file, "carousel", setUploadProgress);
+    const url = await uploadToSupabase(file, "carousel", setUploadProgress, true); // 🔹 isPublic = true
     if (!url) return;
 
     toast.success("Carousel image uploaded ✅");
@@ -125,8 +123,7 @@ export default function AdminUploader() {
   async function removeCarouselImage(name) {
     const { error } = await supabase.storage
       .from("carousel")
-      .remove([`private/${name}`]);
-
+      .remove([`public/${name}`]); // 🔹 public folder
     if (error) toast.error("Failed to delete image");
     else {
       toast.success("Deleted");
@@ -134,7 +131,7 @@ export default function AdminUploader() {
     }
   }
 
-  // ✅ Product image upload
+  // ✅ Product image upload (same as before)
   async function handleProductUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -146,17 +143,15 @@ export default function AdminUploader() {
     toast.success("Product image uploaded ✅");
   }
 
-  // ✅ Add product (stores .json file)
+  // ✅ Add product (same as before)
   async function addProduct() {
     const { name, price, about, image } = productForm;
-
     if (!name || !price || !about || !image)
       return toast.error("Fill in all fields and upload an image");
 
     try {
       const safeName = name.toLowerCase().replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
       const metadata = { name, price, about, image };
-
       const filePath = `private/${Date.now()}-${safeName}.json`;
 
       const { error } = await supabase.storage
@@ -177,15 +172,14 @@ export default function AdminUploader() {
     }
   }
 
-  // ✅ Delete product (by JSON filename)
+  // ✅ Delete product (same as before)
   async function deleteProduct(fileName) {
     const { error } = await supabase.storage
       .from("products")
       .remove([`private/${fileName}`]);
 
-    if (error) {
-      toast.error("Failed to delete product");
-    } else {
+    if (error) toast.error("Failed to delete product");
+    else {
       toast.success("Product deleted ✅");
       loadData();
     }
@@ -205,7 +199,7 @@ export default function AdminUploader() {
           {carouselImages.map((img) => {
             const { data } = supabase.storage
               .from("carousel")
-              .getPublicUrl(`private/${img.name}`);
+              .getPublicUrl(`public/${img.name}`); // 🔹 public folder
             return (
               <div className="admin-tn-preview-card" key={img.name}>
                 <img src={data.publicUrl} alt="carousel" />
