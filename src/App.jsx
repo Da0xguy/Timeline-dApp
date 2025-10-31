@@ -20,10 +20,9 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        {/* Login page */}
+
         <Route path="/login" element={<Login />} />
 
-        {/* Protected admin page */}
         <Route
           path="/admin"
           element={
