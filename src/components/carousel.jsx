@@ -10,15 +10,16 @@ function Carousel() {
 
   const totalSlides = images.length;
 
-  // 🧠 Load images from Supabase Storage (carousel/private/)
+
   const loadImages = async () => {
     console.log("🔄 Fetching carousel images...");
 
     try {
-      // ✅ Only list from the private folder
-      const { data, error } = await supabase.storage
-        .from("carousel")
-        .list("private", { limit: 100 });
+ 
+const { data, error } = await supabase.storage
+  .from("carousel")
+  .list("public", { limit: 100 });
+
 
       if (error) {
         console.error("❌ Error fetching carousel images:", error);
