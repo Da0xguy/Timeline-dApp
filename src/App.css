@@ -1,7 +1,7 @@
 /* ====== NAVBAR ====== */
 /* ====== NAVBAR ====== */
 .navbar {
-  width: 98%;
+  width: 97%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -78,7 +78,7 @@
 }
 
 /* ====== ADMIN BUTTON ====== */
-.admin-tn-btn {
+.admin-btn {
   background: #8b0101;
   color: white;
   border: none;
@@ -89,73 +89,14 @@
   transition: background 0.3s;
 }
 
-.admin-tn-btn:hover {
+.admin-btn:hover {
   background: #5b0302;
-}
-
-/* ====== ADMIN LOGIN POPUP ====== */
-.admin-tn-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.admin-tn-popup {
-  background: #200e00;
-  opacity: 0.9;
-  padding: 20px;
-  border: 2px solid red;
-  border-radius: 8px;
-  width: 350px;
-  text-align: center;
-}
-
-.admin-tn-popup h2 {
-  margin-bottom: 15px;
-  color: #8b0101;
-}
-
-.admin-tn-popup input {
-  width: 90%;
-  padding: 8px;
-  margin: 8px 0;
-  border: none;
-  border-radius: 5px;
-  outline: none;
-}
-
-.admin-tn-popup-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.admin-tn-popup-actions button:first-child {
-  background: #555;
-  color: white;
-}
-
-.admin-tn-popup-actions button:last-child {
-  background: #8b0101;
-  color: white;
-}
-
-.admin-tn-popup-actions button:last-child:hover {
-  background-color: #8f0909;
 }
 
 /* ====== ADMIN PANEL ====== */
 .admin-tn {
   min-height: 100vh;
   padding: 2rem;
-  background: linear-gradient(to bottom, #111, #1a0000);
   color: white;
   font-family: Georgia, "Times New Roman", Times, serif;
 }
@@ -328,7 +269,7 @@
 
 /* ====== LOGOUT BUTTON ====== */
 .admin-tn-logout-btn {
-  background: red;
+  background: #5e0303;
   padding: 10px 15px;
   color: #fff;
   border-radius: 5px;
@@ -523,7 +464,6 @@
 .hero-content h1 span {
   color: #8b0101;
   font-size: 2.5rem;
-  animation: glowText 3s ease-in-out infinite;
 }
 
 .hero-content p {
@@ -982,7 +922,6 @@
   font-style: italic;
 }
 
-/* --- SMALL SCREEN --- */
 @media (max-width: 600px) {
   .uploader, .product-section {
     width: 90%;
@@ -993,214 +932,116 @@
   }
 }
 
-/* --- MOBILE SIDEBAR MENU --- */
-
-.hamburger {
-  display: none;
-  justify-content: space-between;
-  width: 26px;
-  height: 18px;
-  cursor: pointer;
-  z-index: 1100;
-}
-
-.hamburger span {
-  height: 3px;
-  width: 100%;
-  background: red;
-  border-radius: 2px;
-  transition: 0.3s;
-}
-
-.hamburger.active span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
-
-.hamburger.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.active span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-}
-
-/* Sidebar menu (hidden by default) */
 .mobile-menu {
   position: fixed;
   top: 0;
-  right: -100%;
-  width: 70%;
+  left: -100%;
   height: 100vh;
-  background: black;
-  border-left: 2px solid red;
-  box-shadow: -2px 0 10px rgba(255, 0, 0, 0.3);
-  transition: right 0.3s ease-in-out;
+  width: 70%;
+  max-width: 280px;
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  transition: left 0.4s ease;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  z-index: 1000;
+  justify-content: center; /* Centers vertically */
+  align-items: center;
+  padding: 2rem 1rem;
 }
 
 .mobile-menu.open {
-  right: 0;
+  left: 0;
 }
 
 .mobile-menu ul {
   list-style: none;
+  width: 100%;
   text-align: center;
   padding: 0;
 }
 
-.mobile-menu li {
-  color: white;
-  font-size: 1.4rem;
-  margin: 20px 0;
+.mobile-menu ul li {
+  margin: 1rem 0;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: color 0.3s;
-}
-
-.mobile-menu li:hover {
-  color: red;
-}
-
-@media (max-width: 768px) {
-  .navbar {
-    width: 93%;
-  }
-  .links {
-    display: none;
-  }
-
-  .hamburger {
-    display: flex;
-  }
-
-  .navbar {
-    position: relative;
-  }
-}
-/* --- LEFT SIDEBAR MENU --- */
-
-.hamburger {
-  display: none;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 26px;
-  height: 18px;
-  cursor: pointer;
-  z-index: 1200;
-}
-
-.hamburger span {
-  height: 3px;
-  width: 90%;
-  background: #000;
-  border-radius: 2px;
-  transition: 0.3s;
-}
-
-.hamburger.active span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
-
-.hamburger.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.active span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-}
-
-/* Sidebar positioned to the LEFT */
-.mobile-menu.left {
-  position: fixed;
-  top: 0;
-  left: -100%;
-  width: 65%;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
-  border-right: 2px solid red;
-  box-shadow: 2px 0 10px rgba(255, 0, 0, 0.3);
-  transition: left 0.3s ease-in-out;
-  z-index: 1000;
-  pointer-events: none; /* allows page underneath to remain clickable */
-}
-
-.mobile-menu.left.open {
-  left: 0;
-  pointer-events: auto;
-}
-
-/* Sidebar inner layout */
-.menu-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  padding: 40px 20px;
-}
-
-.mobile-menu ul {
-  list-style: none;
-  text-align: left;
-  padding: 0;
-  margin: 0;
-}
-
-.mobile-menu li {
-  color: #fff;
-  font-size: 1.3rem;
-  margin: 18px 0;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.mobile-menu ul li a:hover {
-  color: red;
 }
 
 .mobile-menu ul li a {
-  text-decoration: none;
   color: #fff;
-  font-size: 20px;
-  font-weight: 500;
-  transition: color 0.3s ease, border-bottom 0.3s ease;
+  text-decoration: none;
+  display: block;
 }
 
-.sidebar-logo {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: auto;
+/* 💼 Dashboard item style */
+.mobile-menu ul li:nth-child(4) {
+  background: #007bff;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+}
+.mobile-menu ul li:nth-child(4):hover {
+  background: #0056b3;
+  transform: translateY(-2px);
 }
 
-.sidebar-logo h1 {
-  color: #000;
-  font-size: 1.2rem;
+/* 🔒 Logout item style */
+.mobile-menu ul li:last-child {
+  background: #ff4747;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+}
+.mobile-menu ul li:last-child:hover {
+  background: #d93a3a;
+  transform: translateY(-2px);
 }
 
-.sidebar-logo img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
+/* Hide hamburger on desktop */
+.hamburger {
+  display: none;
 }
 
+/* Show hamburger only on mobile (below 768px width) */
 @media (max-width: 768px) {
-  .links {
-    display: none;
-  }
-
   .hamburger {
     display: flex;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 28px;
+    height: 20px;
+    z-index: 1000;
+    padding: 0;
   }
 
-  .navbar {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
+  .hamburger span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    background: #333; /* or #fff for dark backgrounds */
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+
+  /* Animate into an X when active */
+  .hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
   }
 }
+
+
 
 /* Dashboard layout */
 .dashboard {
@@ -1234,7 +1075,7 @@
   gap: 25px;
   justify-content: center;
   align-items: start;
-  max-width: 1100px;
+  max-width: 400px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -1365,7 +1206,7 @@
 }
 
 .logout-btn {
-  background: red;
+  background: #5b0302;
   padding: 10px 15px;
   color: #fff;
   border-radius: 5px;
@@ -1601,5 +1442,158 @@ button:hover {
 
   .modal-content {
     width: 90%;
+  }
+}
+
+/* 🪟 Product Details Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.modal-content {
+  background: #ede7c7;
+  border-radius: 12px;
+  max-width: 420px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal-image {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.modal-price {
+  color: #222;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.modal-about {
+  color: #444;
+  font-size: 15px;
+  margin-bottom: 15px;
+}
+
+.details-btn {
+  background: #444;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.details-btn:hover {
+  background: #000;
+}
+
+/* 🌐 Login Page Layout */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: "Poppins", sans-serif;
+}
+
+/* 🧱 Login Form Card */
+.login-page form {
+  background: #5b0302;
+  padding: 40px 35px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  width: 95%;
+  max-width: 380px;
+  text-align: center;
+  animation: slideIn 0.4s ease-in-out;
+}
+
+/* 🧭 Heading */
+.login-page h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #ddd;
+  margin-bottom: 25px;
+  letter-spacing: 0.5px;
+}
+
+/* 📩 Input Fields */
+.login-page input {
+  width: 95%;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.login-page input:focus {
+  border-color: #000;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+/* 🔘 Button */
+.login-page button {
+  width: 100%;
+  background: linear-gradient(135deg, #222, #000);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.login-page button:hover {
+  background: linear-gradient(135deg, #000, #333);
+  transform: translateY(-2px);
+}
+
+/* 💫 Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 📱 Responsive */
+@media (max-width: 480px) {
+  .login-page form {
+    padding: 30px 25px;
+    max-width: 320px;
+  }
+
+  .login-page h2 {
+    font-size: 1.4rem;
   }
 }

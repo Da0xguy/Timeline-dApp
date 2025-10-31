@@ -1,48 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import "../App.css";
 import Hero from "../assets/pic9.jpg";
 import Mission from "../assets/mission.jpg";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabase"; // ✅ Supabase client
+import Carousel from "../components/Carousel"; // ✅ Import the Carousel component
 
 function Home() {
   const navigate = useNavigate();
   const heroImageRef = useRef(null);
   const storyImageRef = useRef(null);
 
-  const [carouselImages, setCarouselImages] = useState([]);
-  const [current, setCurrent] = useState(0);
-  const [transitionEnabled, setTransitionEnabled] = useState(true);
-
-  // ✅ Load Carousel from Supabase
-  async function loadCarousel() {
-    const { data, error } = await supabase.storage.from("carousel").list("", { limit: 100 });
-    if (error) {
-      console.error("Carousel fetch error:", error);
-      return;
-    }
-    const urls = data.map((file) =>
-      supabase.storage.from("carousel").getPublicUrl(file.name).publicUrl
-    );
-    setCarouselImages(urls);
-  }
-
-  useEffect(() => {
-    loadCarousel();
-  }, []);
-
-  // ⏱ Auto slide
-  useEffect(() => {
-    if (carouselImages.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % carouselImages.length);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [carouselImages]);
-
-  // ✅ Intersection animations
+  // ✅ Intersection animations for fade-in effects
   useEffect(() => {
     const elements = [heroImageRef.current, storyImageRef.current];
 
@@ -58,6 +26,7 @@ function Home() {
 
   return (
     <>
+      {/* 🏠 Hero Section */}
       <section className="hero" id="home">
         <div className="hero-content">
           <div>
@@ -69,7 +38,7 @@ function Home() {
               Elevate your style with TIMELINE! Get exclusive updates on our
               latest T-shirt designs and promotions.
             </p>
-            <button onClick={() => navigate("/products")} className="explore-btn">
+            <button onClick={() => navigate("/dashboard")} className="explore-btn">
               Explore Items
             </button>
           </div>
@@ -80,6 +49,7 @@ function Home() {
         </div>
       </section>
 
+      {/* 🧵 About / Mission Section */}
       <section className="story" id="about">
         <div className="story-img">
           <img ref={storyImageRef} src={Mission} alt="Mission" />
@@ -103,32 +73,13 @@ function Home() {
           </ul>
         </div>
       </section>
-      <div className="carousel-container">
-        {carouselImages.length === 0 ? (
-          <div className="carousel-empty">
-            <p>No quotes uploaded yet.</p>
-          </div>
-        ) : (
-          <div
-            className="carousel-track"
-            style={{
-              transform: `translateX(-${current * 100}%)`,
-              transition: transitionEnabled ? "transform 0.6s ease-in-out" : "none",
-            }}
-          >
-            {carouselImages.map((img, index) => (
-              <div key={index} className="carousel-slide">
-                <img src={img} alt={`Slide ${index}`} />
-              </div>
-            ))}
-            {carouselImages.length > 0 && (
-              <div className="carousel-slide">
-                <img src={carouselImages[0]} alt="clone" />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+
+      {/* 🖼️ Carousel Section */}
+      <section className="carousel-section">
+        <Carousel />
+      </section>
+
+      {/* ⚡ Footer */}
       <footer className="footer">
         <p>&copy; 2025 Timeline — All Rights Reserved</p>
       </footer>

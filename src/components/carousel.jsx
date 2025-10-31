@@ -1,11 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../supabase"; // ✅ Use your shared Supabase client
 import "../App.css";
-
-// 🔑 Supabase credentials
-const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-const SUPABASE_KEY = "YOUR_ANON_KEY";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function Carousel() {
   const [images, setImages] = useState([]);
@@ -15,23 +10,44 @@ function Carousel() {
 
   const totalSlides = images.length;
 
-  // 🧠 Load images from Supabase Storage
+  // 🧠 Load images from Supabase Storage (carousel/private/)
   const loadImages = async () => {
+    console.log("🔄 Fetching carousel images...");
+
     try {
+      // ✅ Only list from the private folder
       const { data, error } = await supabase.storage
-        .from("carousel") // your bucket name
-        .list("", { limit: 100, offset: 0 });
+        .from("carousel")
+        .list("private", { limit: 100 });
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Error fetching carousel images:", error);
+        return;
+      }
 
-      // Convert paths to public URLs
-      const urls = data.map((file) =>
-        supabase.storage.from("carousel").getPublicUrl(file.name).publicUrl
+      // ✅ Filter out non-image files
+      const imageFiles = data.filter(
+        (file) =>
+          file.name.endsWith(".jpg") ||
+          file.name.endsWith(".jpeg") ||
+          file.name.endsWith(".png") ||
+          file.name.endsWith(".webp")
       );
 
+      console.log("📸 Found image files:", imageFiles);
+
+      // ✅ Generate public URLs for each image
+      const urls = imageFiles.map((file) => {
+        const { data: publicUrlData } = supabase.storage
+          .from("carousel")
+          .getPublicUrl(`private/${file.name}`);
+        return publicUrlData.publicUrl;
+      });
+
       setImages(urls);
+      console.log("✅ Carousel images loaded:", urls);
     } catch (e) {
-      console.error("Failed to load carousel images:", e);
+      console.error("🚨 Failed to load carousel images:", e);
     }
   };
 
@@ -40,7 +56,7 @@ function Carousel() {
     loadImages();
   }, []);
 
-  // ⏱️ Auto slide every 3s
+  // ⏱️ Auto-slide every 3 seconds
   useEffect(() => {
     if (images.length === 0) return;
 
@@ -57,21 +73,23 @@ function Carousel() {
       const timeout = setTimeout(() => {
         setTransitionEnabled(false);
         setCurrent(0);
-      }, 600); // match transition duration
+      }, 600);
       return () => clearTimeout(timeout);
     } else {
       setTransitionEnabled(true);
     }
   }, [current, totalSlides]);
 
+  // 💨 If empty
   if (images.length === 0) {
     return (
       <div className="carousel-container empty">
-        <p>No images uploaded yet.</p>
+        <p>No carousel images found.</p>
       </div>
     );
   }
 
+  // 🖼️ Render
   return (
     <div className="carousel-container">
       <div
@@ -84,10 +102,11 @@ function Carousel() {
       >
         {images.map((img, index) => (
           <div key={index} className="carousel-slide">
-            <img src={img} alt={`Slide ${index}`} />
+            <img src={img} alt={`Slide ${index + 1}`} />
           </div>
         ))}
-        {/* Clone first image for looping */}
+
+        {/* Clone first image for smooth looping */}
         <div className="carousel-slide">
           <img src={images[0]} alt="clone" />
         </div>

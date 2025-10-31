@@ -4,32 +4,83 @@ import { supabase } from "../supabase";
 
 export default function Dashboard() {
   const [products, setProducts] = useState([]);
-  const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showOrderForm, setShowOrderForm] = useState(false);
   const [formData, setFormData] = useState({ name: "", address: "", phone: "" });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  // ✅ Load products from Supabase Storage (products/private/)
   async function loadProducts() {
-    const { data, error } = await supabase.from("products").select("*");
+    console.log("🔄 Fetching products...");
+    setLoading(true);
+
+    const { data, error } = await supabase.storage
+      .from("products")
+      .list("private", { limit: 100 });
 
     if (error) {
-      console.error("Error fetching products:", error);
+      console.error("❌ Error fetching product list:", error);
+      setLoading(false);
       return;
     }
 
-    setProducts(data || []);
-  }
+    const jsonFiles = data.filter((file) => file.name.endsWith(".json"));
+    console.log("📁 Found JSON files:", jsonFiles);
 
-  const handleOrderClick = (product) => {
-    setSelectedProduct(product);
-    setShowOrderForm(true);
-  };
+    const productsWithMeta = await Promise.all(
+      jsonFiles.map(async (file) => {
+        const filePath = `private/${file.name}`;
+        const { data: fileData, error: fileError } = await supabase.storage
+          .from("products")
+          .download(filePath);
+
+        if (fileError) {
+          console.error(`⚠️ Error downloading ${file.name}:`, fileError);
+          return null;
+        }
+
+        try {
+          const text = await fileData.text();
+          const product = JSON.parse(text);
+
+          // ✅ If image is already a full URL, use it directly
+          if (product.image?.startsWith("https://")) {
+            product.image_url = product.image;
+          } else {
+            // Otherwise, generate a public URL from Supabase
+            const imageName = product.image.split("/").pop();
+            const { data: publicUrlData } = supabase.storage
+              .from("products")
+              .getPublicUrl(`private/${imageName}`);
+            product.image_url = publicUrlData.publicUrl;
+          }
+
+          return product;
+        } catch (err) {
+          console.error("⚠️ Invalid JSON in file:", file.name);
+          return null;
+        }
+      })
+    );
+
+    const validProducts = productsWithMeta.filter(Boolean);
+    setProducts(validProducts);
+    console.log("✅ Products loaded:", validProducts);
+    setLoading(false);
+  }
 
   const WHATSAPP_NUMBER = "2348105385548"; // change to yours
 
+  // 🛍️ Open modal for product details
+  const handleViewDetails = (product) => {
+    setSelectedProduct(product);
+  };
+
+  // 🧾 Handle order submission
   const handleSubmitOrder = (e) => {
     e.preventDefault();
 
@@ -45,7 +96,6 @@ export default function Dashboard() {
     `;
 
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-
     window.open(url, "_blank");
 
     setShowOrderForm(false);
@@ -57,26 +107,52 @@ export default function Dashboard() {
       <h2>🛍️ Product Dashboard</h2>
       <p>All products uploaded by the admin are displayed below.</p>
 
-      <div className="product-grid">
-        {products.length === 0 && <div className="note">No products yet.</div>}
+      {loading ? (
+        <div className="note">⏳ Fetching products...</div>
+      ) : (
+        <div className="product-grid">
+          {products.length === 0 && <div className="note">No products yet.</div>}
 
-        {products.map((product) => (
-          <div className="product-card" key={product.id}>
-            <div className="product-image">
-              <img src={product.image_url} alt={product.name} />
+          {products.map((product, index) => (
+            <div className="product-card" key={index}>
+              <div className="product-image">
+                <img src={product.image_url} alt={product.name} />
+              </div>
+              <div className="product-details">
+                <h3>{product.name}</h3>
+                <p className="price">₦{product.price}</p>
+                <button className="details-btn" onClick={() => handleViewDetails(product)}>
+                  View Details
+                </button>
+              </div>
             </div>
-            <div className="product-details">
-              <h3>{product.name}</h3>
-              <p className="price">₦{product.price}</p>
-              <p className="about">{product.about}</p>
-              <button className="order-btn" onClick={() => handleOrderClick(product)}>
-                Order Now
-              </button>
-            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 🪟 Product Details Modal */}
+      {selectedProduct && !showOrderForm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button className="close-btn" onClick={() => setSelectedProduct(null)}>
+              ✕
+            </button>
+            <img
+              src={selectedProduct.image_url}
+              alt={selectedProduct.name}
+              className="modal-image"
+            />
+            <h2>{selectedProduct.name}</h2>
+            <p className="modal-price">₦{selectedProduct.price}</p>
+            <p className="modal-about">{selectedProduct.about}</p>
+            <button className="order-btn" onClick={() => setShowOrderForm(true)}>
+              Order Now
+            </button>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
+      {/* 🧾 Order Form Modal */}
       {showOrderForm && (
         <div className="order-overlay">
           <div className="order-popup">
@@ -108,7 +184,10 @@ export default function Dashboard() {
               <div className="order-actions">
                 <button
                   type="button"
-                  onClick={() => setShowOrderForm(false)}
+                  onClick={() => {
+                    setShowOrderForm(false);
+                    setSelectedProduct(null);
+                  }}
                   className="cancel-btn"
                 >
                   Cancel

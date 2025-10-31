@@ -44,11 +44,11 @@ function Navbar() {
 
         {user ? (
           <>
-            <button onClick={() => navigate("/admin")}>Dashboard</button>
-            <button onClick={handleLogout}>Logout</button>
+            <button className="admin-btn" onClick={() => navigate("/admin")}>Admin</button>
+            <button className="admin-btn" onClick={handleLogout}>Logout</button>
           </>
         ) : (
-          <button onClick={() => navigate("/login")}>Admin Login</button>
+          <button className="admin-btn" onClick={() => navigate("/login")}>Admin</button>
         )}
       </div>
 
@@ -63,7 +63,7 @@ function Navbar() {
           <li><NavLink to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</NavLink></li>
           {user ? (
             <>
-              <li onClick={() => { navigate("/admin"); setIsMenuOpen(false); }}>Dashboard</li>
+              <li onClick={() => { navigate("/admin"); setIsMenuOpen(false); }}>Admin</li>
               <li onClick={() => { handleLogout(); setIsMenuOpen(false); }}>Logout</li>
             </>
           ) : (

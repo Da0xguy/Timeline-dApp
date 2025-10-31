@@ -19,11 +19,11 @@ export default function AdminUploader() {
     loadData();
   }, []);
 
-  // ✅ Load data from storage
+  // ✅ Load all data (carousel + products)
   async function loadData() {
     console.log("🔄 Loading data from Supabase Storage...");
 
-    // Carousel images
+    // Load carousel images
     const { data: slides, error: slidesError } = await supabase.storage
       .from("carousel")
       .list("private", { limit: 100 });
@@ -33,15 +33,43 @@ export default function AdminUploader() {
 
     setCarouselImages(slides || []);
 
-    // Product images
+    // Load products (both images + JSON)
     const { data: productFiles, error: productsError } = await supabase.storage
       .from("products")
       .list("private", { limit: 100 });
 
-    if (productsError) console.error("❌ Products error:", productsError);
-    else console.log("✅ Product files:", productFiles);
+    if (productsError) {
+      console.error("❌ Products error:", productsError);
+      return toast.error("Could not load products");
+    }
 
-    setProducts(productFiles || []);
+    // Only get .json files (our metadata)
+    const jsonFiles = productFiles.filter((file) => file.name.endsWith(".json"));
+
+    // Fetch and parse metadata
+    const productList = [];
+    for (const file of jsonFiles) {
+      const { data: fileData, error: fileError } = await supabase.storage
+        .from("products")
+        .download(`private/${file.name}`);
+
+      if (fileError) {
+        console.error("❌ Failed to download JSON:", fileError);
+        continue;
+      }
+
+      try {
+        const text = await fileData.text();
+        const product = JSON.parse(text);
+        product._fileName = file.name; // store file name for deletion
+        productList.push(product);
+      } catch (err) {
+        console.error("⚠️ Invalid JSON in file:", file.name);
+      }
+    }
+
+    console.log("✅ Loaded products:", productList);
+    setProducts(productList);
   }
 
   async function logout() {
@@ -50,13 +78,16 @@ export default function AdminUploader() {
     window.location.href = "/login";
   }
 
-  // ✅ Reusable upload helper
+  // ✅ Upload helper
   async function uploadToSupabase(file, bucket, setProgress) {
     try {
-      const fileName = `${Date.now()}-${file.name}`;
-      const filePath = `private/${fileName}`;
+      const safeName = file.name
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^\w.-]/g, "");
 
-      console.log(`📤 Uploading to ${bucket}/${filePath}`);
+      const fileName = `${Date.now()}-${safeName}`;
+      const filePath = `private/${fileName}`;
 
       const { data, error } = await supabase.storage
         .from(bucket)
@@ -67,9 +98,6 @@ export default function AdminUploader() {
       const { data: publicUrlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
-
-      console.log("📦 Uploaded:", data);
-      console.log("🌐 URL:", publicUrlData);
 
       setProgress(0);
       return publicUrlData?.publicUrl;
@@ -99,10 +127,8 @@ export default function AdminUploader() {
       .from("carousel")
       .remove([`private/${name}`]);
 
-    if (error) {
-      console.error("❌ Delete error:", error);
-      toast.error("Failed to delete image");
-    } else {
+    if (error) toast.error("Failed to delete image");
+    else {
       toast.success("Deleted");
       loadData();
     }
@@ -120,7 +146,7 @@ export default function AdminUploader() {
     toast.success("Product image uploaded ✅");
   }
 
-  // ✅ Add product — now stored as image with metadata JSON
+  // ✅ Add product (stores .json file)
   async function addProduct() {
     const { name, price, about, image } = productForm;
 
@@ -128,9 +154,10 @@ export default function AdminUploader() {
       return toast.error("Fill in all fields and upload an image");
 
     try {
-      // Save metadata as a .json file alongside image
+      const safeName = name.toLowerCase().replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
       const metadata = { name, price, about, image };
-      const filePath = `private/${Date.now()}-${name.replace(/\s+/g, "_")}.json`;
+
+      const filePath = `private/${Date.now()}-${safeName}.json`;
 
       const { error } = await supabase.storage
         .from("products")
@@ -150,14 +177,13 @@ export default function AdminUploader() {
     }
   }
 
-  // ✅ Delete product (image + JSON)
-  async function deleteProduct(name) {
+  // ✅ Delete product (by JSON filename)
+  async function deleteProduct(fileName) {
     const { error } = await supabase.storage
       .from("products")
-      .remove([`private/${name}`]);
+      .remove([`private/${fileName}`]);
 
     if (error) {
-      console.error("❌ Delete failed:", error);
       toast.error("Failed to delete product");
     } else {
       toast.success("Product deleted ✅");
@@ -193,7 +219,6 @@ export default function AdminUploader() {
       {/* ===== Product Section ===== */}
       <div className="admin-tn-product-section">
         <h3>Add Product</h3>
-
         <input
           type="text"
           placeholder="Product Name"
@@ -231,20 +256,22 @@ export default function AdminUploader() {
         </button>
       </div>
 
-      {/* ===== Product List ===== */}
+      {/* ===== Product List (from JSON) ===== */}
+      <h3>All Products</h3>
       <div className="admin-tn-preview-grid">
-        {products.map((p) => {
-          const { data } = supabase.storage
-            .from("products")
-            .getPublicUrl(`private/${p.name}`);
-          return (
-            <div className="admin-tn-preview-card" key={p.name}>
-              <img src={data.publicUrl} alt={p.name} />
-              <div>{p.name}</div>
-              <button onClick={() => deleteProduct(p.name)}>Delete</button>
+        {products.length === 0 ? (
+          <p>No products found</p>
+        ) : (
+          products.map((p) => (
+            <div className="admin-tn-preview-card" key={p._fileName}>
+              <img src={p.image} alt={p.name} />
+              <h4>{p.name}</h4>
+              <p>₦{p.price}</p>
+              <small>{p.about}</small>
+              <button onClick={() => deleteProduct(p._fileName)}>Delete</button>
             </div>
-          );
-        })}
+          ))
+        )}
       </div>
 
       <button className="admin-tn-logout-btn" onClick={logout}>
