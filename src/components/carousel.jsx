@@ -1,7 +1,11 @@
 import { useEffect, useState, useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
 import "../App.css";
 
-const STORAGE_KEY = "carouselImages";
+// 🔑 Supabase credentials
+const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
+const SUPABASE_KEY = "YOUR_ANON_KEY";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function Carousel() {
   const [images, setImages] = useState([]);
@@ -11,12 +15,21 @@ function Carousel() {
 
   const totalSlides = images.length;
 
-  // 🧠 Load images from localStorage
-  const loadImages = () => {
+  // 🧠 Load images from Supabase Storage
+  const loadImages = async () => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      setImages(parsed.map((img) => img.dataUrl));
+      const { data, error } = await supabase.storage
+        .from("carousel") // your bucket name
+        .list("", { limit: 100, offset: 0 });
+
+      if (error) throw error;
+
+      // Convert paths to public URLs
+      const urls = data.map((file) =>
+        supabase.storage.from("carousel").getPublicUrl(file.name).publicUrl
+      );
+
+      setImages(urls);
     } catch (e) {
       console.error("Failed to load carousel images:", e);
     }
@@ -25,9 +38,6 @@ function Carousel() {
   // 🔁 Load once on mount
   useEffect(() => {
     loadImages();
-    const handleUpdate = () => loadImages();
-    window.addEventListener("carousel-updated", handleUpdate);
-    return () => window.removeEventListener("carousel-updated", handleUpdate);
   }, []);
 
   // ⏱️ Auto slide every 3s
