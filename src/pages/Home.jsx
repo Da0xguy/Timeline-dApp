@@ -3,14 +3,13 @@ import "../App.css";
 import Hero from "../assets/pic9.jpg";
 import Mission from "../assets/mission.jpg";
 import { useNavigate } from "react-router-dom";
-import Carousel from "../components/Carousel"; // ✅ Import the Carousel component
+import Carousel from "../components/carousel";
 
 function Home() {
   const navigate = useNavigate();
   const heroImageRef = useRef(null);
   const storyImageRef = useRef(null);
 
-  // ✅ Intersection animations for fade-in effects
   useEffect(() => {
     const elements = [heroImageRef.current, storyImageRef.current];
 
